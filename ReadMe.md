@@ -10,7 +10,7 @@ AppleのサンプルコードRosyWriter（とGLCameraRipple）を参考に、ビ
 
 ### 現状
 
-![actual result](https://github.com/katokichisoft/Broken-RosyWriter-YUV420/raw/master/result.pngg)
+![actual result](https://github.com/katokichisoft/Broken-RosyWriter-YUV420/raw/master/result.png)
 
 どなたか、原因や解決策の分かる方がいらっしゃったら教えていただきたいです・・・。
 
