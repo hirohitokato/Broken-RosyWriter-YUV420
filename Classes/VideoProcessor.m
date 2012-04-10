@@ -385,28 +385,44 @@
     // コピー元サンプルバッファからピクセルバッファを取り出し、情報収集
     CVPixelBufferRef pixelBuffer = (CVPixelBufferRef)CMSampleBufferGetImageBuffer(original);
 	CVPixelBufferLockBaseAddress( pixelBuffer, 0 );
-    OSType pixelFormatType = CVPixelBufferGetPixelFormatType(pixelBuffer);
 
     // コピー先ピクセルバッファの作成
 	// @FIXME: このオブジェクトが正しく出来ているかどうかが検証できていない
     CVPixelBufferRef copiedPixelBuffer;
-#if 1 // デフォルトの作成方法
+#if 1
     int bufferWidth = CVPixelBufferGetWidth(pixelBuffer);
     int bufferHeight = CVPixelBufferGetHeight(pixelBuffer);
+    OSType pixelFormatType = CVPixelBufferGetPixelFormatType(pixelBuffer);
+    NSMutableDictionary *mAttrs = [NSMutableDictionary dictionary];
+    
+    // 重要：以下の辞書をkCVPixelBufferIOSurfacePropertiesKey下にぶら下げる必要があった
+    NSDictionary *PixelFormatDescription = [NSDictionary dictionaryWithObjectsAndKeys:
+                                            [NSNumber numberWithBool:YES], @"IOSurfaceOpenGLESFBOCompatibility",
+                                            [NSNumber numberWithBool:YES], @"IOSurfaceOpenGLESTextureCompatibility",
+                                            /*[NSNumber numberWithBool:YES], @"OpenGLESCompatibility",*/
+                                            nil];
+    [mAttrs setObject:PixelFormatDescription forKey:(NSString*)kCVPixelBufferIOSurfacePropertiesKey];
+    
     CVPixelBufferCreate(kCFAllocatorDefault,
                         bufferWidth, bufferHeight, pixelFormatType,
-                        NULL,
+                        (CFDictionaryRef)mAttrs,
                         &copiedPixelBuffer);
-#else // バッファプールを使った(メモリを効率的に使う)作成方法。現状、どちらも結果は同じ…
+#else
     static CVPixelBufferPoolRef pool = NULL;
-    if (pool) {
-        CFDictionaryRef attrs;
-        attrs = CVPixelFormatDescriptionCreateWithPixelFormatType(kCFAllocatorDefault, pixelFormatType);
+    if (pool == NULL) {
         NSMutableDictionary *mAttrs = [NSMutableDictionary dictionary];
-        CFRelease(attrs);
-        [mAttrs setObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange] forKey:(NSString*)kCVPixelBufferPixelFormatTypeKey];
+        
+        [mAttrs setObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange]
+                   forKey:(NSString*)kCVPixelBufferPixelFormatTypeKey];
         [mAttrs setObject:[NSNumber numberWithInt:640] forKey:(NSString*)kCVPixelBufferWidthKey];
         [mAttrs setObject:[NSNumber numberWithInt:480] forKey:(NSString*)kCVPixelBufferHeightKey];
+        // 重要：以下の辞書をkCVPixelBufferIOSurfacePropertiesKey下にぶら下げる必要があった
+        NSDictionary *PixelFormatDescription = [NSDictionary dictionaryWithObjectsAndKeys:
+                                                [NSNumber numberWithBool:YES], @"IOSurfaceOpenGLESFBOCompatibility",
+                                                [NSNumber numberWithBool:YES], @"IOSurfaceOpenGLESTextureCompatibility",
+                                                /*[NSNumber numberWithBool:YES], @"OpenGLESCompatibility",*/
+                                                nil];
+        [mAttrs setObject:PixelFormatDescription forKey:(NSString*)kCVPixelBufferIOSurfacePropertiesKey];
         
         CVPixelBufferPoolCreate(kCFAllocatorDefault,
                                 NULL,
