@@ -4,7 +4,20 @@ AppleのサンプルコードRosyWriter（とGLCameraRipple）を参考に、ビ
 
 しかし、現状ではコピーしたサンプルバッファを使おうとしても、画面表示・ビデオ録画のどちらにも使えない、壊れたサンプルバッファしか作れていません。
 
+### 期待する結果
+
+![expected result](https://github.com/katokichisoft/Broken-RosyWriter-YUV420/expect.png)
+
+### 現状
+
+![actual result](https://github.com/katokichisoft/Broken-RosyWriter-YUV420/result.png)
+
 どなたか、原因や解決策の分かる方がいらっしゃったら教えていただきたいです・・・。
+
+## 目的
+- デリゲートメソッド`captureOutput:didOutputSampleBuffer:fromConnection:`に届くYUV420のサンプルバッファを、__正しいデータとして__コピーすること。
+- イメージバッファのコピーは「浅いコピー」ではなく「深いコピー」をすること
+
 
 ## なぜコピーしようとしているか
 一般的な使い方だと、デリゲートメソッドに届くサンプルバッファは、描画に使ったり録画するなどして消費します。ですが、これをあえて保持しておくことで、複数フレームからデータを解析／加工することができないかと考えました。
