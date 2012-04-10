@@ -4,19 +4,25 @@ AppleのサンプルコードRosyWriter（とGLCameraRipple）を参考に、ビ
 
 しかし、現状ではコピーしたサンプルバッファを使おうとしても、画面表示・ビデオ録画のどちらにも使えない、壊れたサンプルバッファしか作れていません。
 
+## 目的
+- デリゲートメソッド`captureOutput:didOutputSampleBuffer:fromConnection:`に届くYUV420のサンプルバッファを、__正しいデータとして__コピーすること。
+- イメージバッファのコピーは「浅いコピー」ではなく「深いコピー」をすること
+
+上記の処理を、`VideoProcessor.m`の中の`deepCopySampleBuffer:`メソッドで行おうとしています。
+
 ### 期待する結果
+- 画面に表示した際、きちんと色が付いて見えること
+- AVAssetWriterオブジェクトに`appendSampleBuffer:`メソッドでサンプルバッファを書き込むと、ムービーの１フレームとして保存してくれること
 
 ![expected result](https://github.com/katokichisoft/Broken-RosyWriter-YUV420/raw/master/expect.png)
 
 ### 現状
+- 画面に表示すると、緑色に覆われる
+- AVAssetWriterオブジェクトに`appendSampleBuffer:`メソッドで書き込むと、不正なイメージデータだとしてエラーが返る
 
 ![actual result](https://github.com/katokichisoft/Broken-RosyWriter-YUV420/raw/master/result.png)
 
 どなたか、原因や解決策の分かる方がいらっしゃったら教えていただきたいです・・・。
-
-## 目的
-- デリゲートメソッド`captureOutput:didOutputSampleBuffer:fromConnection:`に届くYUV420のサンプルバッファを、__正しいデータとして__コピーすること。
-- イメージバッファのコピーは「浅いコピー」ではなく「深いコピー」をすること
 
 
 ## なぜコピーしようとしているか
