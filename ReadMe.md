@@ -6,11 +6,11 @@ AppleのサンプルコードRosyWriter（とGLCameraRipple）を参考に、ビ
 
 ### 期待する結果
 
-![expected result](https://github.com/katokichisoft/Broken-RosyWriter-YUV420/expect.png)
+![expected result](https://github.com/katokichisoft/Broken-RosyWriter-YUV420/raw/master/expect.png)
 
 ### 現状
 
-![actual result](https://github.com/katokichisoft/Broken-RosyWriter-YUV420/result.png)
+![actual result](https://github.com/katokichisoft/Broken-RosyWriter-YUV420/raw/master/result.pngg)
 
 どなたか、原因や解決策の分かる方がいらっしゃったら教えていただきたいです・・・。
 
