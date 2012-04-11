@@ -393,15 +393,10 @@
     int bufferWidth = CVPixelBufferGetWidth(pixelBuffer);
     int bufferHeight = CVPixelBufferGetHeight(pixelBuffer);
     OSType pixelFormatType = CVPixelBufferGetPixelFormatType(pixelBuffer);
-    NSMutableDictionary *mAttrs = [NSMutableDictionary dictionary];
     
-    // 重要：以下の辞書をkCVPixelBufferIOSurfacePropertiesKey下にぶら下げる必要があった
-    NSDictionary *PixelFormatDescription = [NSDictionary dictionaryWithObjectsAndKeys:
-                                            [NSNumber numberWithBool:YES], @"IOSurfaceOpenGLESFBOCompatibility",
-                                            [NSNumber numberWithBool:YES], @"IOSurfaceOpenGLESTextureCompatibility",
-                                            /*[NSNumber numberWithBool:YES], @"OpenGLESCompatibility",*/
-                                            nil];
-    [mAttrs setObject:PixelFormatDescription forKey:(NSString*)kCVPixelBufferIOSurfacePropertiesKey];
+    // 重要：辞書(空で良い)をkCVPixelBufferIOSurfacePropertiesKeyでセットする
+	NSDictionary *mAttrs = [NSDictionary dictionaryWithObject:[NSDictionary dictionary]
+													   forKey:(id)kCVPixelBufferIOSurfacePropertiesKey];
     
     CVPixelBufferCreate(kCFAllocatorDefault,
                         bufferWidth, bufferHeight, pixelFormatType,
@@ -416,13 +411,8 @@
                    forKey:(NSString*)kCVPixelBufferPixelFormatTypeKey];
         [mAttrs setObject:[NSNumber numberWithInt:640] forKey:(NSString*)kCVPixelBufferWidthKey];
         [mAttrs setObject:[NSNumber numberWithInt:480] forKey:(NSString*)kCVPixelBufferHeightKey];
-        // 重要：以下の辞書をkCVPixelBufferIOSurfacePropertiesKey下にぶら下げる必要があった
-        NSDictionary *PixelFormatDescription = [NSDictionary dictionaryWithObjectsAndKeys:
-                                                [NSNumber numberWithBool:YES], @"IOSurfaceOpenGLESFBOCompatibility",
-                                                [NSNumber numberWithBool:YES], @"IOSurfaceOpenGLESTextureCompatibility",
-                                                /*[NSNumber numberWithBool:YES], @"OpenGLESCompatibility",*/
-                                                nil];
-        [mAttrs setObject:PixelFormatDescription forKey:(NSString*)kCVPixelBufferIOSurfacePropertiesKey];
+		// 重要：辞書(空で良い)をkCVPixelBufferIOSurfacePropertiesKeyでセットする
+        [mAttrs setObject:[NSDictionary dictionary] forKey:(NSString*)kCVPixelBufferIOSurfacePropertiesKey];
         
         CVPixelBufferPoolCreate(kCFAllocatorDefault,
                                 NULL,
