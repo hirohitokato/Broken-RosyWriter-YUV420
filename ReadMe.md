@@ -36,14 +36,38 @@ __(2012/4/10 23:55 @whitedev氏と@norio_nomura氏のご協力により原因判
 しかしこのAPIでは、サンップルバッファ内のイメージバッファ、つまりバッファプールから取り出したイメージバッファのretain countを増やすだけの、「浅いコピー」しか行いません。
 この状態でコピーしたサンプルバッファを溜めても、バッファプールが枯渇することには変わりないのです。
 
-# 追記：解決しました！
-### 調査により判明した原因
-`CVPixelBufferRef`オブジェクトを作成するときに指定するPixelFormatDescriptionについて、OpenGLESコンパチの関連設定を__kCVPixelBufferIOSurfacePropertiesKey__にぶら下げる必要があった。
-これまでは辞書の最上層に置かれていたために、認識できなかったのかも？
+===========
+# (2012/4/11追記)原因と対策
+## 調査により判明した原因
+`CVPixelBufferRef`オブジェクトを作成するときに指定するPixelFormatDescriptionについて、__kCVPixelBufferIOSurfacePropertiesKey__キーと適当な辞書を属性として設定すれば良いことが分かりました。
 
-### 対策
-`@"IOSurfaceOpenGLESFBOCompatibility"`と`@"IOSurfaceOpenGLESTextureCompatibility"`の二つのキー（ともにTRUE）を、`kCVPixelBufferIOSurfacePropertiesKey`の下に辞書として属性設定する。
+## コード
+ピクセルバッファあるいはピクセルバッファプールを作成するときの属性として、`kCVPixelBufferIOSurfacePropertiesKey`と辞書を設定します。
 
-`kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange`で確認した範囲だと、`CVPixelBufferCreateResolvedAttributesDictionary()`を使ったピクセルバッファの属性は、不正な値になっている(iOS5.1)。
-そのため、SDKが作成する「正しい」PixelBufferを確認し、まったく同じ構成にしなければならない。
+```objc
+NSDictionary *mAttrs = [NSDictionary dictionaryWithObject:[NSDictionary dictionary]
+                                                   forKey:(id)kCVPixelBufferIOSurfacePropertiesKey];
 
+CVPixelBufferCreate(kCFAllocatorDefault,
+                    bufferWidth, bufferHeight, pixelFormatType,
+                    (CFDictionaryRef)mAttrs,
+                    &copiedPixelBuffer);
+```
+```objc
+NSMutableDictionary *mAttrs = [NSMutableDictionary dictionary];
+
+[mAttrs setObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange]
+           forKey:(NSString*)kCVPixelBufferPixelFormatTypeKey];
+[mAttrs setObject:[NSNumber numberWithInt:640] forKey:(NSString*)kCVPixelBufferWidthKey];
+[mAttrs setObject:[NSNumber numberWithInt:480] forKey:(NSString*)kCVPixelBufferHeightKey];
+
+[mAttrs setObject:[NSDictionary dictionary] forKey:(NSString*)kCVPixelBufferIOSurfacePropertiesKey];
+ 
+CVPixelBufferPoolCreate(kCFAllocatorDefault,
+                        NULL,
+                        (CFDictionaryRef)mAttrs,
+                        &pool);
+```
+
+------
+See [Technical Note TN2267 : Video Decode Acceleration Framework Reference](http://developer.apple.com/library/mac/#technotes/tn2267/_index.html)
